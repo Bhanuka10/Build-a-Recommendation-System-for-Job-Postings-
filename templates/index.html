@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Recommendation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #dc143c 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 40px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #dc143c;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        /* Main content area */
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Input section */
+        .input-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-section h2 {
+            color: #dc143c;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1em;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #dc143c;
+            border-bottom-color: #dc143c;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        textarea, select, input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus, select:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #dc143c;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-size: 0.95em;
+        }
+
+        .upload-area {
+            border: 2px dashed #dc143c;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fff5f5;
+        }
+
+        .upload-area:hover {
+            background: #ffe8e8;
+            border-color: #1a1a1a;
+        }
+
+        .upload-area.drag-over {
+            background: #ffd6d6;
+            border-color: #1a1a1a;
+            transform: scale(1.02);
+        }
+
+        .upload-area p {
+            margin: 10px 0;
+            color: #666;
+        }
+
+        .upload-area .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #dc143c 0%, #1a1a1a 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(220, 20, 60, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* Results section */
+        .results-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            grid-column: 1 / -1;
+            min-height: 300px;
+        }
+
+        .results-section h2 {
+            color: #dc143c;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .no-results .icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .no-results p {
+            font-size: 1.1em;
+        }
+
+        /* Job card */
+        .job-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            border-left: 4px solid #dc143c;
+        }
+
+        .job-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateX(5px);
+        }
+
+        .job-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .job-rank {
+            background: linear-gradient(135deg, #dc143c 0%, #1a1a1a 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .job-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .job-company {
+            font-size: 1.1em;
+            color: #dc143c;
+            font-weight: 600;
+        }
+
+        .job-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+            padding: 15px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-label {
+            font-size: 0.85em;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .job-skills {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .job-skills label {
+            margin-bottom: 8px;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            background: #fff0f0;
+            color: #dc143c;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        /* Score section */
+        .score-section {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff5f5;
+            border-radius: 5px;
+        }
+
+        .score-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.85em;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #dc143c;
+        }
+
+        .score-percentage {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        /* Loading state */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #dc143c;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error message */
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* Success message */
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3c3;
+            display: none;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .job-card-header {
+                flex-direction: column;
+            }
+
+            .job-rank {
+                margin-bottom: 10px;
+            }
+
+            .score-section {
+                flex-direction: column;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>💼 Job Recommendation System</h1>
+            <p>Find the most relevant job opportunities based on your skills and experience</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2>Your Profile</h2>
+                
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <!-- Tabs -->
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="skills-tab">Skills</button>
+                    <button class="tab-btn" data-tab="resume-tab">Resume</button>
+                </div>
+
+                <!-- Skills Tab -->
+                <div class="tab-content active" id="skills-tab">
+                    <form id="skillsForm">
+                        <div class="form-group">
+                            <label for="skillsInput">Enter Your Skills</label>
+                            <textarea 
+                                id="skillsInput" 
+                                placeholder="Enter your skills separated by commas (e.g., Python, Machine Learning, SQL, NumPy, Scikit-learn)..."
+                            ></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="experienceLevel">Experience Level</label>
+                            <select id="experienceLevel">
+                                <option value="Entry Level">Entry Level (0-2 years)</option>
+                                <option value="Mid Level" selected>Mid Level (3-7 years)</option>
+                                <option value="Senior Level">Senior Level (8+ years)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="topN">Number of Recommendations</label>
+                            <select id="topN">
+                                <option value="5">Top 5</option>
+                                <option value="10" selected>Top 10</option>
+                                <option value="15">Top 15</option>
+                                <option value="20">Top 20</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="skillsSubmitBtn">
+                            Find Matching Jobs
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Resume Tab -->
+                <div class="tab-content" id="resume-tab">
+                    <form id="resumeForm" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>Upload Your Resume</label>
+                            <div class="upload-area" id="uploadArea">
+                                <div class="icon">📄</div>
+                                <p><strong>Click to upload or drag and drop</strong></p>
+                                <p style="font-size: 0.9em; margin: 5px 0;">PDF, TXT, or DOCX (Max 5MB)</p>
+                                <input type="file" id="fileInput" accept=".pdf,.txt,.docx">
+                            </div>
+                            <p id="fileName" style="margin-top: 10px; color: #667eea; font-weight: 600;"></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resumeExperienceLevel">Experience Level</label>
+                            <select id="resumeExperienceLevel">
+                                <option value="Entry Level">Entry Level (0-2 years)</option>
+                                <option value="Mid Level" selected>Mid Level (3-7 years)</option>
+                                <option value="Senior Level">Senior Level (8+ years)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resumeTopN">Number of Recommendations</label>
+                            <select id="resumeTopN">
+                                <option value="5">Top 5</option>
+                                <option value="10" selected>Top 10</option>
+                                <option value="15">Top 15</option>
+                                <option value="20">Top 20</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="resumeSubmitBtn">
+                            Analyze Resume
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="input-section">
+                <h2>About This System</h2>
+                <div style="line-height: 1.8; color: #666;">
+                    <p style="margin-bottom: 15px;">
+                        <strong>How it works:</strong>
+                    </p>
+                    <ul style="margin-left: 20px; margin-bottom: 15px;">
+                        <li>Enter your skills or upload your resume</li>
+                        <li>Select your experience level</li>
+                        <li>Get instant job recommendations ranked by match score</li>
+                    </ul>
+
+                    <p style="margin-bottom: 15px;">
+                        <strong>Matching Algorithm:</strong>
+                    </p>
+                    <ul style="margin-left: 20px; margin-bottom: 15px;">
+                        <li><strong>85%</strong> - Skill similarity using TF-IDF</li>
+                        <li><strong>15%</strong> - Experience level compatibility bonus</li>
+                    </ul>
+
+                    <p style="margin-bottom: 15px;">
+                        <strong>Results include:</strong>
+                    </p>
+                    <ul style="margin-left: 20px;">
+                        <li>Job title and company information</li>
+                        <li>Location and salary details</li>
+                        <li>Required skills and experience level</li>
+                        <li>Match score percentage</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+            <h2>Recommended Jobs</h2>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing your profile and finding matching jobs...</p>
+            </div>
+
+            <div id="resultsContainer" class="no-results">
+                <div class="icon">🔍</div>
+                <p>Enter your skills or upload your resume to see recommendations</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Job Recommendation System • Powered by AI-Driven Skill Matching • 2024</p>
+    </div>
+
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+                
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Remove active from all buttons
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                // Show selected tab and mark button as active
+                document.getElementById(tabName).classList.add('active');
+                btn.classList.add('active');
+            });
+        });
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            fileInput.files = e.dataTransfer.files;
+            updateFileName();
+        });
+
+        fileInput.addEventListener('change', updateFileName);
+
+        function updateFileName() {
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                fileName.textContent = `✓ Selected: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+            } else {
+                fileName.textContent = '';
+            }
+        }
+
+        // Helper functions
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+            setTimeout(() => errorDiv.classList.remove('active'), 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.classList.add('active');
+            setTimeout(() => successDiv.classList.remove('active'), 3000);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('active', show);
+        }
+
+        function displayResults(recommendations) {
+            const container = document.getElementById('resultsContainer');
+            
+            if (!recommendations || recommendations.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <div class="icon">❌</div>
+                        <p>No matching jobs found. Try adjusting your skills or experience level.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            recommendations.forEach((job, index) => {
+                const skillsTags = job.required_skills
+                    .split(',')
+                    .map(skill => skill.trim())
+                    .filter(skill => skill)
+                    .slice(0, 5)
+                    .map(skill => `<span class="skill-tag">${skill}</span>`)
+                    .join('');
+
+                html += `
+                    <div class="job-card">
+                        <div class="job-card-header">
+                            <div>
+                                <div class="job-title">${job.job_title}</div>
+                                <div class="job-company">${job.company}</div>
+                            </div>
+                            <div class="job-rank">#${job.rank}</div>
+                        </div>
+
+                        <div class="job-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">📍 Location</span>
+                                <span class="meta-value">${job.location}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">💰 Salary</span>
+                                <span class="meta-value">${job.salary}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">🏢 Industry</span>
+                                <span class="meta-value">${job.industry}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">📊 Level</span>
+                                <span class="meta-value">${job.experience_level}</span>
+                            </div>
+                        </div>
+
+                        <div class="job-skills">
+                            <label>Required Skills:</label>
+                            <div class="skills-list">
+                                ${skillsTags}
+                            </div>
+                        </div>
+
+                        <div class="score-section">
+                            <div class="score-item">
+                                <div class="score-label">Skill Match</div>
+                                <div class="score-value">${(job.skill_match_score * 100).toFixed(1)}%</div>
+                            </div>
+                            <div class="score-item">
+                                <div class="score-label">Experience Match</div>
+                                <div class="score-value">${(job.experience_match_bonus * 100).toFixed(1)}%</div>
+                            </div>
+                            <div class="score-item">
+                                <div class="score-label">Overall Match</div>
+                                <div class="score-percentage">${job.match_percentage}%</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Skills form submission
+        document.getElementById('skillsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const skills = document.getElementById('skillsInput').value.trim();
+            const experienceLevel = document.getElementById('experienceLevel').value;
+            const topN = document.getElementById('topN').value;
+
+            if (!skills) {
+                showError('Please enter your skills');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const response = await fetch('/api/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        skills: skills,
+                        experience_level: experienceLevel,
+                        top_n: parseInt(topN)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data.recommendations);
+                    showSuccess(`Found ${data.count} matching jobs!`);
+                } else {
+                    showError(data.error || 'Error getting recommendations');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Resume form submission
+        document.getElementById('resumeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!fileInput.files.length) {
+                showError('Please select a resume file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('experience_level', document.getElementById('resumeExperienceLevel').value);
+            formData.append('top_n', document.getElementById('resumeTopN').value);
+
+            showLoading(true);
+
+            try {
+                const response = await fetch('/api/upload-resume', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data.recommendations);
+                    showSuccess(`Resume analyzed! Found ${data.count} matching jobs!`);
+                } else {
+                    showError(data.error || 'Error analyzing resume');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        });
+    </script>
+</body>
+</html>
